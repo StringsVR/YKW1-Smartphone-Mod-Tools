@@ -3,4 +3,7 @@ This is a tool made for the use of injecting mods into ykw1 smartphone app. This
 
 ## How To Use 
 
-- 1
+1. After opening the application you will need to provide your YKW1 Smartphone app files. You can do this with ADB or Extracting it yourself and locating it on your pc.
+
+### ADB
+
