@@ -23,7 +23,11 @@ If yours closes immediately, make sure you allowed debugging on your phone and A
 
 ![ADB-Install4](docs/4.png)
 
-5. After this your files should be pulled. 
+5. After this your files should be pulled.
+
+6. Make sure to put this icon.png file into ".\Unmodified APKS\ykw1_unzipped" or **IT WILL CRASH**
+
+![ADB-Install5](docs/icon.png)
 
 ### Pulling it yourself (Importing Package)
 1. If you want to pull the files yourself I'd recommend using Lucky Patcher because it can handle .APKS files but its up to you.
@@ -44,3 +48,26 @@ Wait until the progress bar reaches 100% on the bottom progress bar.
 ![Decompiling2](docs/6.png)
 
 ### Modding
+1. Click "Import Mod File (.ykm)", locate the mod you wish to import , click "Open".
+
+![Modding1](docs/7.png)
+
+2. Click "Inject" and wait for "Files Copied Succesfully".
+Note: If you get a "Failed to unzip mod error", clear your "Mods" folder.
+
+![Modding2](docs/8.png)
+
+### Compiling
+1. After you finish importing your mods, click "Build". (This can take minutes)
+
+![Compiling1](docs/9.png)
+
+2. Wait until it reaches 100% then click "Merge". (This can take minutes)
+
+![Compiling2](docs/10.png)
+
+3. Wait until the CMD window closes then click "Sign". (This can take minutes)
+
+![Compiling3](docs/11.png)
+
+4. Wait until the CMD window closes click "Export" and save it as you please.
