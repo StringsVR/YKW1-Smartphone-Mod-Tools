@@ -30,3 +30,5 @@ If yours closes immediately, make sure you allowed debugging on your phone and A
 1. If you want to pull the files yourself I'd recommend using Lucky Patcher because it can handle .APKS files but its up to you.
 
 2. After putting the file on your PC, Click "Import Package" and locate your .APKS/.ZIP.
+
+##
