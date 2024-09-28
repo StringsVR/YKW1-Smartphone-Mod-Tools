@@ -77,3 +77,9 @@ You can make mods the same way you do for the switch copy. Editing and messing w
 
 How do I make a .ykm file?
 After completing your mod make sure its in a way where your directory is setup as assets->data->etc, Compress your assets folder into a .ZIP and rename it to YourMod.ykm
+
+## Special Thanks To
+[APKEditor](https://github.com/REAndroid/APKEditor)
+[APKTool](https://github.com/iBotPeaches/Apktool)
+[Uber-APK-Signer](https://github.com/patrickfav/uber-apk-signer)
+[Enma Injector](https://github.com/NullGang/Enma-Injector/tree/main)
