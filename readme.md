@@ -80,6 +80,9 @@ After completing your mod make sure its in a way where your directory is setup a
 
 ## Special Thanks To
 [APKEditor](https://github.com/REAndroid/APKEditor)
+
 [APKTool](https://github.com/iBotPeaches/Apktool)
+
 [Uber-APK-Signer](https://github.com/patrickfav/uber-apk-signer)
+
 [Enma Injector](https://github.com/NullGang/Enma-Injector/tree/main)
