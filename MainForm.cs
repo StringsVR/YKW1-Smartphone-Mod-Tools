@@ -19,7 +19,6 @@ namespace YKW1S_Mod_Tools
     {
         string filePath = " ";
 
-
         public MainForm()
         {
             InitializeComponent();
@@ -40,15 +39,6 @@ namespace YKW1S_Mod_Tools
             EnableModnBuild();
         }
 
-        private void importModBtn_Click(object sender, EventArgs e)
-        {
-            ImportModFile();
-        }
-
-        private void injectModBtn_Click(object sender, EventArgs e)
-        {
-            InjectMods();
-        }
 
         private void buildBtn_Click(object sender, EventArgs e)
         {
@@ -127,8 +117,7 @@ namespace YKW1S_Mod_Tools
                 if (File.Exists(@".\AdbWinApi.dll")) { File.Delete(@".\AdbWinApi.dll"); }
                 if (File.Exists(@".\AdbWinUsbApi.dll")) { File.Delete(@".\AdbWinUsbApi.dll"); }
                 MessageBox.Show("Succesfully Reset Everything.", "Reset Complete", MessageBoxButtons.OK);
-                this.Controls.Clear();
-                this.InitializeComponent();
+
             }
             else
             {
@@ -175,79 +164,6 @@ namespace YKW1S_Mod_Tools
             EnableModnBuild();
         }
 
-        private void ImportModFile()
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Filter = "Yo-Kai Watch Mod file (*.ykm)|*.ykm";
-            DialogResult result = openFileDialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                File.Copy(openFileDialog.FileName, $@".\Mods\{Path.GetFileName(openFileDialog.FileName)}", true);
-            }
-            injectModBtn.Enabled = true;
-        }
-
-        private void InjectMods()
-        {
-            string directoryPath = @".\Mods\";
-            string[] files = Directory.GetFiles(directoryPath);
-            var ykmFiles = files.Where(file => Path.GetExtension(file).Equals(".ykm", StringComparison.OrdinalIgnoreCase));
-
-            if (!ykmFiles.Any())
-            {
-                MessageBox.Show("No .ykm files found.");
-                return;
-            }
-
-            string outputDirectory = Path.Combine(directoryPath, "UnzippedMods");
-            if (Directory.Exists(outputDirectory)) { Directory.Delete(outputDirectory, true); }
-            Directory.CreateDirectory(outputDirectory);
-
-            foreach (var ykmFile in ykmFiles)
-            {
-                try
-                {
-                    // Create a separate folder for each unzipped file
-                    ZipFile.ExtractToDirectory(ykmFile, outputDirectory);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error unzipping {ykmFile}: {ex.Message}");
-                }
-            }
-
-            string[] modfiles = Directory.GetFiles(outputDirectory, "*", SearchOption.AllDirectories);
-
-            // Copy each file to the destination directory
-            foreach (var file in modfiles)
-            {
-                try
-                {
-                    // Get the relative path of the file from the source directory
-                    string relativePath = file.Substring(outputDirectory.Length + 1);
-
-                    // Construct the full destination path
-                    string destinationPath = Path.Combine(@".\Decompiled\split_asset_pack_install_time\", relativePath);
-
-                    // Ensure the destination subdirectory exists
-                    string destinationSubdirectory = Path.GetDirectoryName(destinationPath);
-                    if (!Directory.Exists(destinationSubdirectory))
-                    {
-                        Directory.CreateDirectory(destinationSubdirectory);
-                    }
-
-                    // Copy the file to the destination directory
-                    File.Copy(file, destinationPath, true);  // Overwrite if file exists
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error copying {file}: {ex.Message}");
-                }
-            }
-
-            MessageBox.Show("Files copied successfully.");
-        }
-
         private async void BuildAPKS()
         {
             if (!Directory.Exists(@".\Build\")) { Directory.CreateDirectory(@".\Build\"); }
@@ -276,7 +192,7 @@ namespace YKW1S_Mod_Tools
             if (File.Exists(@".\merged_app-aligned-debugSigned.apk.idsig")) { File.Delete(@".\merged_app-aligned-debugSigned.apk.idsig"); }
             await Task.Run(() => Process.Start("cmd.exe", $@"/c cd {Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)} && java -jar uber-apk-signer.jar --apks .\merged_app.apk && del .\merged_app.apk"));
             exportBtn.Enabled = true;
-            if (File.Exists(@".\adb.exe"))
+            if (ADBInstalled())
             {
                 adbButton.Enabled = true;
             }
@@ -393,6 +309,10 @@ namespace YKW1S_Mod_Tools
                 File.Copy($@"{outputDirectory}\AdbWinUsbApi.dll", @".\AdbWinUsbApi.dll", true);
                 Directory.Delete(@".\platform-tools", true);
                 MessageBox.Show("ADB Installed!");
+                if (ADBInstalled() && exportBtn.Enabled)
+                {
+                    adbButton.Enabled = true;
+                }
             }
         }
 
@@ -457,7 +377,7 @@ namespace YKW1S_Mod_Tools
         private void EnableModnBuild()
         {
             if (!Directory.Exists(@".\Mods\")) { Directory.CreateDirectory(@".\Mods\"); }
-            importModBtn.Enabled = true;
+            openModPanelBtn.Enabled = true;
             buildBtn.Enabled = true;
         }
 
@@ -641,6 +561,35 @@ namespace YKW1S_Mod_Tools
                 Console.WriteLine(output);
                 return output;
             }
+        }
+
+        private void openDecompilationFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string currentDirectory = Directory.GetCurrentDirectory().ToString();
+            if (Directory.Exists(@".\Decompiled"))
+            {
+                Process.Start("explorer.exe", Path.Combine(currentDirectory, "Decompiled"));
+            }
+            else
+            {
+                Process.Start("explorer.exe", currentDirectory);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            modPanel modPanel = new modPanel();
+            modPanel.Show();
+        }
+
+        private bool ADBInstalled()
+        {
+            return File.Exists(@".\adb.exe");
+        }
+
+        private void adbButton_Click(object sender, EventArgs e)
+        {
+            ExecuteCommandWithWindow(@"adb install .\merged_app-aligned-debugSigned.apk");
         }
     }
 }

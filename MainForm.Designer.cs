@@ -39,6 +39,7 @@
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.searchForStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resetToPresetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openDecompilationFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ImportPanel = new System.Windows.Forms.Panel();
             this.decompilePanel = new System.Windows.Forms.Panel();
@@ -51,9 +52,8 @@
             this.skipBtn = new System.Windows.Forms.Button();
             this.decompileTitle = new System.Windows.Forms.Label();
             this.moddingPanel = new System.Windows.Forms.Panel();
-            this.importModBtn = new System.Windows.Forms.Button();
+            this.openModPanelBtn = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.injectModBtn = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.buildBtn = new System.Windows.Forms.Button();
             this.mergeBtn = new System.Windows.Forms.Button();
@@ -86,7 +86,7 @@
             this.exitToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(431, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(431, 30);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -98,7 +98,7 @@
             this.importAppPackageToolStripMenuItem,
             this.exportToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 24);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(46, 26);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // installADBToolStripMenuItem
@@ -133,29 +133,37 @@
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.searchForStringToolStripMenuItem,
-            this.resetToPresetToolStripMenuItem});
+            this.resetToPresetToolStripMenuItem,
+            this.openDecompilationFolderToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 26);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // searchForStringToolStripMenuItem
             // 
             this.searchForStringToolStripMenuItem.Name = "searchForStringToolStripMenuItem";
-            this.searchForStringToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.searchForStringToolStripMenuItem.Size = new System.Drawing.Size(277, 26);
             this.searchForStringToolStripMenuItem.Text = "Search For String";
             this.searchForStringToolStripMenuItem.Click += new System.EventHandler(this.searchForStringToolStripMenuItem_Click);
             // 
             // resetToPresetToolStripMenuItem
             // 
             this.resetToPresetToolStripMenuItem.Name = "resetToPresetToolStripMenuItem";
-            this.resetToPresetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.resetToPresetToolStripMenuItem.Size = new System.Drawing.Size(277, 26);
             this.resetToPresetToolStripMenuItem.Text = "Reset To Preset";
             this.resetToPresetToolStripMenuItem.Click += new System.EventHandler(this.resetToPresetToolStripMenuItem_Click);
+            // 
+            // openDecompilationFolderToolStripMenuItem
+            // 
+            this.openDecompilationFolderToolStripMenuItem.Name = "openDecompilationFolderToolStripMenuItem";
+            this.openDecompilationFolderToolStripMenuItem.Size = new System.Drawing.Size(277, 26);
+            this.openDecompilationFolderToolStripMenuItem.Text = "Open Decompilation Folder";
+            this.openDecompilationFolderToolStripMenuItem.Click += new System.EventHandler(this.openDecompilationFolderToolStripMenuItem_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(47, 24);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(47, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -267,24 +275,23 @@
             // moddingPanel
             // 
             this.moddingPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.moddingPanel.Controls.Add(this.importModBtn);
+            this.moddingPanel.Controls.Add(this.openModPanelBtn);
             this.moddingPanel.Controls.Add(this.label1);
-            this.moddingPanel.Controls.Add(this.injectModBtn);
             this.moddingPanel.Location = new System.Drawing.Point(-7, 269);
             this.moddingPanel.Name = "moddingPanel";
             this.moddingPanel.Size = new System.Drawing.Size(444, 126);
             this.moddingPanel.TabIndex = 4;
             // 
-            // importModBtn
+            // openModPanelBtn
             // 
-            this.importModBtn.Enabled = false;
-            this.importModBtn.Location = new System.Drawing.Point(115, 88);
-            this.importModBtn.Name = "importModBtn";
-            this.importModBtn.Size = new System.Drawing.Size(157, 33);
-            this.importModBtn.TabIndex = 7;
-            this.importModBtn.Text = "Import Mod File (.ykm)";
-            this.importModBtn.UseVisualStyleBackColor = true;
-            this.importModBtn.Click += new System.EventHandler(this.importModBtn_Click);
+            this.openModPanelBtn.Enabled = false;
+            this.openModPanelBtn.Location = new System.Drawing.Point(277, 88);
+            this.openModPanelBtn.Name = "openModPanelBtn";
+            this.openModPanelBtn.Size = new System.Drawing.Size(157, 33);
+            this.openModPanelBtn.TabIndex = 7;
+            this.openModPanelBtn.Text = "Open Modding Panel";
+            this.openModPanelBtn.UseVisualStyleBackColor = true;
+            this.openModPanelBtn.Click += new System.EventHandler(this.button1_Click);
             // 
             // label1
             // 
@@ -295,17 +302,6 @@
             this.label1.Size = new System.Drawing.Size(131, 35);
             this.label1.TabIndex = 6;
             this.label1.Text = "Modding";
-            // 
-            // injectModBtn
-            // 
-            this.injectModBtn.Enabled = false;
-            this.injectModBtn.Location = new System.Drawing.Point(278, 88);
-            this.injectModBtn.Name = "injectModBtn";
-            this.injectModBtn.Size = new System.Drawing.Size(157, 33);
-            this.injectModBtn.TabIndex = 6;
-            this.injectModBtn.Text = "Inject";
-            this.injectModBtn.UseVisualStyleBackColor = true;
-            this.injectModBtn.Click += new System.EventHandler(this.injectModBtn_Click);
             // 
             // panel1
             // 
@@ -381,6 +377,7 @@
             this.adbButton.TabIndex = 11;
             this.adbButton.Text = "Send via ADB";
             this.adbButton.UseVisualStyleBackColor = true;
+            this.adbButton.Click += new System.EventHandler(this.adbButton_Click);
             // 
             // exportBtn
             // 
@@ -452,8 +449,6 @@
         private System.Windows.Forms.Button skipBtn;
         private System.Windows.Forms.Panel moddingPanel;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button importModBtn;
-        private System.Windows.Forms.Button injectModBtn;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button buildBtn;
         private System.Windows.Forms.Button mergeBtn;
@@ -470,6 +465,8 @@
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem searchForStringToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resetToPresetToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openDecompilationFolderToolStripMenuItem;
+        private System.Windows.Forms.Button openModPanelBtn;
     }
 }
 
