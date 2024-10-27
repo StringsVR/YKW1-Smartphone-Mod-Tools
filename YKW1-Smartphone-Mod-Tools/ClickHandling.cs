@@ -28,7 +28,7 @@ namespace YKW1_Smartphone_Mod_Tools
                         try
                         {
                             adbProcess.Kill(); // Kill the ADB process
-                            adbProcess.WaitForExit(); // Wait for the process to exit
+                            await adbProcess.WaitForExitAsync(); // Wait for the process to exit
                         }
                         catch (Exception ex)
                         {
@@ -48,58 +48,56 @@ namespace YKW1_Smartphone_Mod_Tools
             string url = "https://dl.google.com/android/repository/platform-tools-latest-windows.zip";
             string zipFilePath = Path.Combine(Directory.GetCurrentDirectory(), "platform-tools.zip");
             string extractPath = Directory.GetCurrentDirectory();
-            using (HttpClient client = new HttpClient())
+            using HttpClient client = new HttpClient();
+            try
             {
-                try
+                // the ZIP file
+                using (HttpResponseMessage response = await client.GetAsync(url))
                 {
-                    // the ZIP file
-                    using (HttpResponseMessage response = await client.GetAsync(url))
+                    response.EnsureSuccessStatusCode();
+                    await using (FileStream fs = new FileStream(zipFilePath, FileMode.Create))
                     {
-                        response.EnsureSuccessStatusCode();
-                        using (FileStream fs = new FileStream(zipFilePath, FileMode.Create))
-                        {
-                            await response.Content.CopyToAsync(fs);
-                        }
-                    }
-
-                    // Extract the ZIP file
-                    ZipFile.ExtractToDirectory(zipFilePath, extractPath);
-                }
-                catch (Exception ex)
-                {
-                    await MessageBox.ShowErrorAsync("Error Occured", $"An error occurred: {ex.Message}");
-                }
-                finally
-                {
-                    // Cleanup: Delete the downloaded zip file
-                    if (File.Exists(zipFilePath))
-                    {
-                        File.Delete(zipFilePath);
+                        await response.Content.CopyToAsync(fs);
                     }
                 }
 
-                string directoryPath = @".\";
-                string outputDirectory = Path.Combine(directoryPath, "platform-tools");
-
-                File.Copy($@"{outputDirectory}\adb.exe", @"adb.exe", true);
-                File.Copy($@"{outputDirectory}\AdbWinApi.dll", @"AdbWinApi.dll", true);
-                File.Copy($@"{outputDirectory}\AdbWinUsbApi.dll", @"AdbWinUsbApi.dll", true);
-                Directory.Delete(@"platform-tools", true);
-                await MessageBox.ShowInformationAsync("ADB Installed Succesfully!", "ADB Installed!");
+                // Extract the ZIP file
+                ZipFile.ExtractToDirectory(zipFilePath, extractPath);
             }
+            catch (Exception ex)
+            {
+                await MessageBox.ShowErrorAsync("Error Occured", $"An error occurred: {ex.Message}");
+            }
+            finally
+            {
+                // Cleanup: Delete the downloaded zip file
+                if (File.Exists(zipFilePath))
+                {
+                    File.Delete(zipFilePath);
+                }
+            }
+
+            string directoryPath = @".\";
+            string outputDirectory = Path.Combine(directoryPath, "platform-tools");
+
+            await FileUtils.CopyAsync($@"{outputDirectory}\adb.exe", @"adb.exe");
+            await FileUtils.CopyAsync($@"{outputDirectory}\AdbWinApi.dll", @"AdbWinApi.dll");
+            await FileUtils.CopyAsync($@"{outputDirectory}\AdbWinUsbApi.dll", @"AdbWinUsbApi.dll");
+            Directory.Delete(@"platform-tools", true);
+            await MessageBox.ShowInformationAsync("ADB Installed Succesfully!", "ADB Installed!");
         }
 
         public static async void importPackageViaADB_Click()
         {
             try
             {
-                Logic.ExecuteADBCommand("adb connect");
+                await Logic.ExecuteADBCommand("adb connect");
                 if (!(Logic.IsADBConnected()))
                 {
-                    Logic.ExecuteADBCommand("adb connect");
+                    await Logic.ExecuteADBCommand("adb connect");
                 }
 
-                string apkPathsOutput = Logic.ExecuteADBCommand("adb shell pm path jp.co.level5.yws1");
+                string apkPathsOutput = await Logic.ExecuteADBCommand("adb shell pm path jp.co.level5.yws1");
 
                 if (string.IsNullOrWhiteSpace(apkPathsOutput))
                 {
@@ -123,7 +121,7 @@ namespace YKW1_Smartphone_Mod_Tools
                     Console.WriteLine(commandPullApk);
 
                     Console.WriteLine($"Pulled {apkFileName} to {localFilePath}");
-                    await Task.Run(() => Logic.ExecuteCommand(commandPullApk, false, -1));
+                    await Logic.ExecuteCommand(commandPullApk, false, -1);
                 }
 
                 DirectoryUtils.DeleteFileIfExists(@"Unmodified APKS\ykw1.apks");
@@ -151,7 +149,7 @@ namespace YKW1_Smartphone_Mod_Tools
                     new FileFilter("APKS Package", "apks"),
                     new FileFilter("Zip Archive", "zip")
                 }
-                    
+
             };
             var result = await openFileDialog.ShowAsync();
 
@@ -171,7 +169,7 @@ namespace YKW1_Smartphone_Mod_Tools
                     if (!(Logic.processInTransit()))
                     {
                         DirectoryUtils.CreateDirectoryIfNotExists(@"Unmodified APKS\");
-                        File.Copy(Logic.fileLocation, @"Unmodified APKS\ykw1.zip", true);
+                        await FileUtils.CopyAsync(Logic.fileLocation, @"Unmodified APKS\ykw1.zip");
 
                         Logic.setProgressBar(1);
                         DirectoryUtils.DeleteDirectoryIfExists(@"Unmodified APKS\ykw1_unzipped\");
@@ -190,7 +188,7 @@ namespace YKW1_Smartphone_Mod_Tools
                 }
                 else
                 {
-                    await MessageBox.ShowErrorAsync("Error: File Not Found", "The Files Necessary For Compilation and Decompilation \n \are missing. Try reinstalling.");
+                    await MessageBox.ShowErrorAsync("Error: File Not Found", "The Files Necessary For Compilation and Decompilation\nare missing. Try reinstalling.");
                 }
             }
             else
@@ -215,7 +213,7 @@ namespace YKW1_Smartphone_Mod_Tools
                         DirectoryUtils.CreateDirectoryIfNotExists(@"Build\");
                         await Logic.BuildApkAsync(@"Decompiled\base", @"Build\base.apk", 3);
                         await Logic.BuildApkAsync(@"Decompiled\split_asset_pack_install_time", @"Build\split_asset_pack_install_time.apk", 4);
-                        DirectoryUtils.CopyFilesToBuild(@"Unmodified APKS\ykw1_unzipped\");
+                        await DirectoryUtils.CopyFilesToBuild(@"Unmodified APKS\ykw1_unzipped\");
                         await MessageBox.ShowInformationAsync("Task Finished", "Compilation has completed succesfully!");
                     }
                     else
@@ -274,7 +272,7 @@ namespace YKW1_Smartphone_Mod_Tools
             }
         }
 
-        public async static void exportButton_Click()
+        public static async void exportButton_Click()
         {
             if (File.Exists("Build_merged-aligned-debugSigned.apk"))
             {
@@ -284,11 +282,11 @@ namespace YKW1_Smartphone_Mod_Tools
                 if (result == DialogResult.Ok)
                 {
                     var savePath = saveFileDialog.SelectedPath;
-                    byte[] apkData = File.ReadAllBytes("Build_merged-aligned-debugSigned.apk");
+                    byte[] apkData = await File.ReadAllBytesAsync("Build_merged-aligned-debugSigned.apk");
 
                     try
                     {
-                        File.WriteAllBytes(savePath, apkData);
+                        await File.WriteAllBytesAsync(savePath, apkData);
                         await MessageBox.ShowInformationAsync("Success", $"APK file saved successfully at {savePath}");
                     }
                     catch (Exception ex)
@@ -307,7 +305,7 @@ namespace YKW1_Smartphone_Mod_Tools
         {
             if (Logic.IsADBConnected())
             {
-                Logic.ExecuteCommand("adb install Build_merged-aligned-debugSigned.apk", false, 6);
+                await Logic.ExecuteCommand("adb install Build_merged-aligned-debugSigned.apk", false, 6);
             }
             else
             {
@@ -360,7 +358,7 @@ namespace YKW1_Smartphone_Mod_Tools
             if (result == DialogResult.Ok)
             {
                 DirectoryUtils.CreateDirectoryIfNotExists("Mods");
-                File.Copy(openFileDialog.SelectedPath, @$"Mods\{Path.GetFileName(openFileDialog.SelectedPath)}", true);
+                await FileUtils.CopyAsync(openFileDialog.SelectedPath, @$"Mods\{Path.GetFileName(openFileDialog.SelectedPath)}");
             }
         }
 
@@ -401,13 +399,18 @@ namespace YKW1_Smartphone_Mod_Tools
                     string relativePath = file.Substring(outputDirectory.Length + 1);
                     string destinationPath = Path.Combine(@"Decompiled\split_asset_pack_install_time\", relativePath);
 
-                    string destinationSubdirectory = Path.GetDirectoryName(destinationPath).ToString();
+                    string? destinationSubdirectory = Path.GetDirectoryName(destinationPath);
+                    if (destinationSubdirectory == null)
+                    {
+                        continue;
+                    }
+
                     if (!Directory.Exists(destinationSubdirectory))
                     {
                         Directory.CreateDirectory(destinationSubdirectory);
                     }
 
-                    File.Copy(file, destinationPath, true);
+                    await FileUtils.CopyAsync(file, destinationPath);
                 }
                 catch (Exception ex)
                 {

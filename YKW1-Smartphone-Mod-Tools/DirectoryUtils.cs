@@ -32,7 +32,7 @@ namespace YKW1_Smartphone_Mod_Tools
             }
         }
 
-        public static void CopyFilesToBuild(string sourceDir)
+        public static async Task CopyFilesToBuild(string sourceDir)
         {
             string[] filesToCopy = new[]
             {
@@ -45,12 +45,12 @@ namespace YKW1_Smartphone_Mod_Tools
             foreach (var file in filesToCopy)
             {
                 string combinedPath = Path.Combine(sourceDir, file);
-                if (!File.Exists(combinedPath)) { MessageBox.ShowErrorAsync($@"Warning: {file} not found."); return; }
-                File.Copy(combinedPath, Path.Combine(@".\Build", file), true);
+                if (!File.Exists(combinedPath)) { await MessageBox.ShowErrorAsync($@"Warning: {file} not found."); return; }
+                await FileUtils.CopyAsync(combinedPath, Path.Combine(@".\Build", file));
             }
         }
 
-        public static void CopyFilesRecursively(string sourcePath, string destinationPath)
+        public static async Task CopyFilesRecursively(string sourcePath, string destinationPath)
         {
             // Check if source directory exists
             if (!Directory.Exists(sourcePath))
@@ -68,7 +68,7 @@ namespace YKW1_Smartphone_Mod_Tools
                 string destinationFilePath = Path.Combine(destinationPath, fileName);
 
                 // Copy file and overwrite if it exists
-                File.Copy(filePath, destinationFilePath, true);
+                await FileUtils.CopyAsync(filePath, destinationFilePath);
             }
 
             // Recursively copy each subdirectory in the source directory
@@ -78,7 +78,7 @@ namespace YKW1_Smartphone_Mod_Tools
                 string destinationDirectoryPath = Path.Combine(destinationPath, directoryName);
 
                 // Recursively call the function for each subdirectory
-                CopyFilesRecursively(directoryPath, destinationDirectoryPath);
+                await CopyFilesRecursively(directoryPath, destinationDirectoryPath);
             }
         }
     }

@@ -13,11 +13,11 @@ namespace YKW1_Smartphone_Mod_Tools
 
     public static class Logic
     {
-        public static string fileLocation;
-        public static string fileName;
+        public static string? fileLocation;
+        public static string? fileName;
 
         //Functions
-        public static void SetFileLocation(string location)
+        public static void SetFileLocation(string? location)
         {
             MainForm.fileLocationLabel.Text = $"   File Location: {location}";
             fileLocation = location;
@@ -28,7 +28,7 @@ namespace YKW1_Smartphone_Mod_Tools
         {
             try
             {
-                await Task.Run(() => ExecuteCommand($"apktool.bat d -f \"{apkPath}\" -o \"{outputPath}\"", true, phase));
+                await ExecuteCommand($"apktool.bat d -f \"{apkPath}\" -o \"{outputPath}\"", true, phase);
             }
             catch (Exception ex)
             {
@@ -40,8 +40,8 @@ namespace YKW1_Smartphone_Mod_Tools
         {
             try
             {
-                await Task.Run(() => ExecuteCommand($"apktool.bat b \"{decompiledPath}\"", true, phase));
-                File.Copy(Path.Combine(decompiledPath, "dist", Path.GetFileName(outputApkPath)), outputApkPath, true);
+                await ExecuteCommand($"apktool.bat b \"{decompiledPath}\"", true, phase);
+                await FileUtils.CopyAsync(Path.Combine(decompiledPath, "dist", Path.GetFileName(outputApkPath)), outputApkPath);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace YKW1_Smartphone_Mod_Tools
             try
             {
                 DirectoryUtils.DeleteFileIfExists("Build_merged.apk");
-                await Task.Run(() => ExecuteCommand(@$"java -jar APKEditor.jar m -i .\Build", true, 5));
+                await ExecuteCommand(@$"java -jar APKEditor.jar m -i .\Build", true, 5);
             }
             catch (Exception ex)
             {
@@ -66,7 +66,7 @@ namespace YKW1_Smartphone_Mod_Tools
         {
             try
             {
-                await Task.Run(() => ExecuteCommand($@"java -jar uber-apk-signer.jar  --apks .\Build_merged.apk", true, 6));
+                await ExecuteCommand($@"java -jar uber-apk-signer.jar  --apks .\Build_merged.apk", true, 6);
             }
             catch (Exception ex)
             {
@@ -74,7 +74,7 @@ namespace YKW1_Smartphone_Mod_Tools
             }
         }
 
-        public static void ExecuteCommand(string command, bool progress, int type)
+        public static async Task ExecuteCommand(string command, bool progress, int type)
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo
             {
@@ -86,54 +86,52 @@ namespace YKW1_Smartphone_Mod_Tools
                 CreateNoWindow = true
             };
 
-            using (Process process = new Process())
+            using Process process = new Process();
+            process.StartInfo = processStartInfo;
+
+            // Event handler for standard output
+            process.OutputDataReceived += (sender, args) =>
             {
-                process.StartInfo = processStartInfo;
-
-                // Event handler for standard output
-                process.OutputDataReceived += (sender, args) =>
+                if (!string.IsNullOrEmpty(args.Data))
                 {
-                    if (!string.IsNullOrEmpty(args.Data))
+                    Console.WriteLine(args.Data);  // Print each line of output as it's received
+                    if (progress)
                     {
-                        Console.WriteLine(args.Data);  // Print each line of output as it's received
-                        if (progress)
-                        {
-                            UpdateProgress(type, args.Data);
-                        }
+                        UpdateProgress(type, args.Data);
                     }
-                };
+                }
+            };
 
 
-                // Event handler for standard error
-                process.ErrorDataReceived += async (sender, args) =>
+            // Event handler for standard error
+            process.ErrorDataReceived += async (sender, args) =>
+            {
+                if (!string.IsNullOrEmpty(args.Data) && !args.Data.Contains("Could not find sources"))
                 {
-                    if (!string.IsNullOrEmpty(args.Data) && !args.Data.Contains("Could not find sources"))
+                    if (!(command.Contains("java -jar")))
                     {
-                        if (!(command.Contains("java -jar")))
-                        {
-                            Console.WriteLine("Error:");
-                            Console.WriteLine(args.Data);  // Print each line of error as it's received
-                            await MessageBox.ShowErrorAsync("Error Occured", $"Error: {args.Data}");
-                        }
-                        else
-                        {
-                            Console.WriteLine(args.Data);
-                            UpdateProgress(type, args.Data);
-                        }
+                        Console.WriteLine("Error:");
+                        Console.WriteLine(args.Data);  // Print each line of error as it's received
+                        await MessageBox.ShowErrorAsync("Error Occured", $"Error: {args.Data}");
                     }
-                };
+                    else
+                    {
+                        Console.WriteLine(args.Data);
+                        UpdateProgress(type, args.Data);
+                    }
+                }
+            };
 
-                process.Start();
+            process.Start();
 
-                // Begin asynchronous reading
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
+            // Begin asynchronous reading
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
 
-                process.WaitForExit();
-            }
+            await process.WaitForExitAsync();
         }
 
-        public static string ExecuteADBCommand(string command)
+        public static async Task<string> ExecuteADBCommand(string command)
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo
             {
@@ -145,25 +143,23 @@ namespace YKW1_Smartphone_Mod_Tools
                 CreateNoWindow = false
             };
 
-            using (Process process = new Process())
+            using Process process = new Process();
+            process.StartInfo = processStartInfo;
+            process.Start();
+
+            // Read the output
+            string output = await process.StandardOutput.ReadToEndAsync();
+            string error = await process.StandardError.ReadToEndAsync();
+
+            await process.WaitForExitAsync();
+
+            if (!string.IsNullOrEmpty(error))
             {
-                process.StartInfo = processStartInfo;
-                process.Start();
-
-                // Read the output
-                string output = process.StandardOutput.ReadToEnd();
-                string error = process.StandardError.ReadToEnd();
-
-                process.WaitForExit();
-
-                if (!string.IsNullOrEmpty(error))
-                {
-                    throw new Exception(error);
-                }
-
-                Console.WriteLine(output);
-                return output;
+                throw new Exception(error);
             }
+
+            Console.WriteLine(output);
+            return output;
         }
 
         private static Dictionary<string, int> progressMap;
@@ -201,7 +197,7 @@ namespace YKW1_Smartphone_Mod_Tools
                 {
                     var progress = entry.Value;
                     setProgressBar(progress);
-                    
+
                     break; // Exit after setting progress for the first match
                 }
             }
@@ -226,7 +222,7 @@ namespace YKW1_Smartphone_Mod_Tools
 
         public static bool apkToolsFound()
         {
-            var FileRequiredList = new List<string> { "APKEditor.jar", "apktool.bat", "apktool_2.9.3.jar", "certificate.pem", "certificate.pem", "key.pk8", "uber-apk-signer.jar" };
+            var FileRequiredList = new List<string> { "APKEditor.jar", "apktool.bat", "apktool_2.9.3.jar", "certificate.pem", "key.pk8", "uber-apk-signer.jar" };
 
             foreach (var file in FileRequiredList)
             {
