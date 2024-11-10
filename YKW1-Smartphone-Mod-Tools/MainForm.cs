@@ -14,7 +14,8 @@ using SharpGen.Runtime.Win32;
 public class MainForm : Form
 {
     public static Label fileLocationLabel;
-    public static ProgressBar progressBar; 
+    public static ProgressBar progressBar;
+    public static MenuBarButton modeOption;
 
     public MainForm() : base()
     {
@@ -36,6 +37,11 @@ public class MainForm : Form
         var OptionItems = new List<string> { "Reset To Preset", "Open Decompiled Folder" };
         var OptionItemsFunction = new List<Action> { ClickHandling.ResetAsync, ClickHandling.OpenDecompFolder };
         var OptionMenu = AddUI.AddMenuItems("Options", OptionItems, OptionItemsFunction);
+
+        modeOption = new MenuBarButton("MODE: SPLIT_ASSET");
+        modeOption.Clicked += (s, e) => ClickHandling.ChangeMODE();
+
+        OptionMenu.Items.Add(modeOption);
         this.MenuBar.Items.Add(OptionMenu);
 
         //Add Exit

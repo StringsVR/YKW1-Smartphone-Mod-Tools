@@ -12,8 +12,11 @@ using System.Threading.Tasks;
 
 namespace YKW1_Smartphone_Mod_Tools
 {
+
     public static class ClickHandling
     {
+        private static bool mode = true;
+
         //MainForm MainMenuBar
         public static async void installADB_Click()
         {
@@ -91,7 +94,6 @@ namespace YKW1_Smartphone_Mod_Tools
         {
             try
             {
-                await Logic.ExecuteADBCommand("adb connect");
                 if (!(Logic.IsADBConnected()))
                 {
                     await Logic.ExecuteADBCommand("adb connect");
@@ -155,8 +157,15 @@ namespace YKW1_Smartphone_Mod_Tools
 
             if (result == DialogResult.Ok)
             {
-                var path = openFileDialog.SelectedPath;
-                Logic.SetFileLocation(path);
+                if (Path.GetExtension(openFileDialog.SelectedPath) == ".apks" || Path.GetExtension(openFileDialog.SelectedPath) == ".zip")
+                {
+                    var path = openFileDialog.SelectedPath;
+                    Logic.SetFileLocation(path);
+                }
+                else
+                {
+                    await MessageBox.ShowErrorAsync("Error Occured", "file must be a .APKS or .ZIP");
+                }
             }
         }
 
@@ -417,6 +426,17 @@ namespace YKW1_Smartphone_Mod_Tools
                     await MessageBox.ShowErrorAsync("Error Occured", $"Error copying {file}: {ex.Message}");
                 }
             }
+
+            await MessageBox.ShowInformationAsync("Task Completed Succesfully!", "The mod has succesfully been injected");
+        }
+
+        public async static void ChangeMODE()
+        {
+            mode = !mode;
+            if (mode)
+                MainForm.modeOption.Text = "Mode Option: SPLIT_ASSET";
+            else
+                MainForm.modeOption.Text = "Mode Option: BASE";
         }
     }
 }
